@@ -33,13 +33,13 @@ public class MealoApplication {
             this.totalAmount = 0.0;
         }
 
-        // Member function to add item to order
+        // function to add item to order
         void addItem(FoodItem item) {
             totalAmount += item.getPrice();
             System.out.println("Added: " + item.itemName + " to Order #" + orderNumber);
         }
 
-        // Member function to display order summary
+        // function to display order summary
         void displayOrderSummary() {
             System.out.println("Order #" + orderNumber + " Total: " + totalAmount);
         }
@@ -47,25 +47,25 @@ public class MealoApplication {
 
     public static void main(String[] args) {
 
-            // Create an instance of App to access the inner classes
+            // Creating an instance of main class to access inner class
             MealoApplication app = new MealoApplication();
 
-            // Creating food item objects
+            // Creating food item 
             FoodItem burger = app.new FoodItem("Burger", 5.99);
             FoodItem pizza = app.new FoodItem("Pizza", 8.99);
 
-            // Displaying item details
+            // Displaying item 
             burger.displayItemDetails();
             pizza.displayItemDetails();
 
-            // Creating an order object
+            // Creating an order 
             Order order1 = app.new Order(101);
 
             // Adding items to the order
             order1.addItem(burger);
             order1.addItem(pizza);
 
-            // Displaying order summary
+            // Displaying summary
             order1.displayOrderSummary();
         }
     }
