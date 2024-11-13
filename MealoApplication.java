@@ -3,191 +3,170 @@ package com.example.mealo;
 public class MealoApplication {
 
     // Static variables (protected for access within subclasses)
-    protected static int totalOrders = 0;  // Keeping track of total orders
-    protected static double serviceCharge = 2.50;  // Service charge applied to all orders
+    protected static int totalOrders = 0;
+    protected static double serviceCharge = 2.50;
 
     // Food Item (Abstract Base class)
     abstract class FoodItem {
-        // Private data members (encapsulation)
         private String itemName;
         private double price;
 
-        // Constructor (public for external access)
+        // Constructor
         public FoodItem(String name, double price) {
             this.itemName = name;
             this.price = price;
         }
 
-        // Overloaded constructor for FoodItem (demonstrating polymorphism)
+        // Overloaded constructor (polymorphism)
         public FoodItem(String name) {
             this.itemName = name;
-            this.price = 0.0;  // Default price
+            this.price = 0.0;
         }
 
-        // Public accessor (getter) for itemName (encapsulation)
         public String getItemName() {
             return itemName;
         }
 
-        // Public mutator (setter) for itemName (encapsulation)
         public void setItemName(String itemName) {
             this.itemName = itemName;
         }
 
-        // Public accessor (getter) for price (encapsulation)
         public double getPrice() {
             return price;
         }
 
-        // Public mutator (setter) for price (encapsulation)
         public void setPrice(double price) {
-            if (price > 0) {  // Validation to ensure the price is positive
+            if (price > 0) {
                 this.price = price;
             } else {
                 System.out.println("Price must be positive.");
             }
         }
 
-        // Abstract method (virtual function) to display item details
+        // Abstract method for displaying item details
         public abstract void displayItemDetails();
     }
 
-    // Single Inheritance: BeverageItem class inherits from FoodItem class
+    // BeverageItem class following SRP
     class BeverageItem extends FoodItem {
         private boolean isCold;
 
-        // Constructor for BeverageItem
         public BeverageItem(String name, double price, boolean isCold) {
-            super(name, price);  // Call parent class (FoodItem) constructor
+            super(name, price);
             this.isCold = isCold;
         }
 
-        // Implement the abstract method (overriding the virtual function)
         @Override
         public void displayItemDetails() {
             System.out.println("Item: " + getItemName() + ", Price: " + getPrice() + ", Is Cold: " + isCold);
         }
     }
 
-    // Order class (Base class)
+    // Order class (Adheres to SRP)
     class Order {
-
-        // Private data members (encapsulation)
         private int orderNumber;
         private double totalAmount;
 
-        // Constructor (public for external access)
         public Order(int number) {
             this.orderNumber = number;
             this.totalAmount = 0.0;
-            totalOrders++;  // Increment total orders whenever an order is created
+            totalOrders++;
         }
 
-        // Accessor (getter) for orderNumber (encapsulation)
         public int getOrderNumber() {
             return orderNumber;
         }
 
-        // Accessor (getter) for totalAmount (encapsulation)
         public double getTotalAmount() {
             return totalAmount;
         }
 
-        // Private method to calculate total with service charge (abstraction)
-        private double calculateTotalWithServiceCharge() {
-            return totalAmount + serviceCharge;
-        }
-
-        // Public method to get final total (abstraction)
-        public double getFinalTotal() {
-            return calculateTotalWithServiceCharge();
-        }
-
-        // Public method to add item to order (abstraction)
+        // Method to add item price to total amount
         public void addItem(FoodItem item) {
             totalAmount += item.getPrice();
             System.out.println("Added: " + item.getItemName() + " to Order #" + orderNumber);
         }
 
-        // Public method to display order summary (abstraction)
+        // Method to calculate total with service charge
+        public double getFinalTotal() {
+            return totalAmount + serviceCharge;
+        }
+
         public void displayOrderSummary() {
             System.out.println("Order #" + orderNumber + " Total: " + totalAmount);
         }
     }
 
-    // Multilevel Inheritance: PremiumOrder inherits from Order
+    // PremiumOrder class following OCP
     class PremiumOrder extends Order {
-        private double discount;  // Additional attribute for premium orders
+        private double discount;
 
-        // Constructor
         public PremiumOrder(int number, double discount) {
-            super(number);  // Call parent class (Order) constructor
+            super(number);
             this.discount = discount;
         }
 
-        // Override to apply discount
         @Override
         public double getFinalTotal() {
-            double totalWithService = super.getFinalTotal();  // Call parent class method
+            double totalWithService = super.getFinalTotal();
             return totalWithService - discount;
         }
     }
 
-    // Further Multilevel Inheritance: SpecialOrder inherits from PremiumOrder
+    // SpecialOrder class adhering to LSP
     class SpecialOrder extends PremiumOrder {
 
-        // Constructor
         public SpecialOrder(int number, double discount) {
-            super(number, discount);  // Call parent class (PremiumOrder) constructor
+            super(number, discount);
         }
 
-        // Additional functionality for special orders
         public void addSpecialGift() {
             System.out.println("Special gift added to Order #" + getOrderNumber());
         }
     }
 
+    // Separate class to handle order processing (SRP)
+    class OrderProcessor {
+        public void processOrder(Order order) {
+            System.out.println("Processing Order #" + order.getOrderNumber());
+            order.displayOrderSummary();
+            System.out.println("Final Total: " + order.getFinalTotal());
+        }
+    }
+
     public static void main(String[] args) {
-        // Create an instance of the main class to access the inner classes
         MealoApplication app = new MealoApplication();
 
-        // Demonstrate constructor overloading (polymorphism)
-        FoodItem defaultItem = app.new BeverageItem("Pasta", 0.0, false);  // Constructor with only name
-        defaultItem.displayItemDetails();  // Default price is 0
+        // Using BeverageItem class (SRP)
+        FoodItem burger = app.new BeverageItem("Burger", 5.99, true);
+        burger.displayItemDetails();
 
-        FoodItem pricedItem = app.new BeverageItem("Burger", 5.99, true);  // Constructor with name and price
-        pricedItem.displayItemDetails();  // Displays price with 5.99
-
-        // Creating an array of FoodItem objects
-        FoodItem[] menu = new FoodItem[3];
-        menu[0] = pricedItem;  // Already created burger item
-        menu[1] = app.new BeverageItem("Coke", 2.99, true);  // Using BeverageItem
-        menu[2] = app.new BeverageItem("Salad", 4.99, false);
-
-        // Displaying all menu items using the array
-        for (FoodItem item : menu) {
-            item.displayItemDetails();
-        }
-
-        // Creating an order object
+        // Create an order and add items (SRP)
         Order order1 = app.new Order(101);
-        order1.addItem(menu[0]);  // Adding Burger
-        order1.addItem(menu[1]);  // Adding Coke (from BeverageItem)
+        order1.addItem(burger);
 
-        // Displaying order summary
+        // Display order summary
         order1.displayOrderSummary();
-
-        // Display final total with service charge
         System.out.println("Final Total with Service Charge: " + order1.getFinalTotal());
+
+        // Create a PremiumOrder (OCP)
+        PremiumOrder premiumOrder = app.new PremiumOrder(102, 3.0);
+        premiumOrder.addItem(burger);
+        System.out.println("Final Total with Discount: " + premiumOrder.getFinalTotal());
+
+        // Create a SpecialOrder (LSP)
+        SpecialOrder specialOrder = app.new SpecialOrder(103, 2.0);
+        specialOrder.addItem(burger);
+        specialOrder.addSpecialGift();
+        System.out.println("Final Total for Special Order: " + specialOrder.getFinalTotal());
+
+        // Using OrderProcessor class (SRP)
+        OrderProcessor processor = app.new OrderProcessor();
+        processor.processOrder(order1);
+        processor.processOrder(premiumOrder);
+        processor.processOrder(specialOrder);
 
         // Total orders created
         System.out.println("Total Orders Created: " + MealoApplication.totalOrders);
-
-        // Demonstrate PremiumOrder with discount (Multilevel inheritance)
-        SpecialOrder specialOrder = app.new SpecialOrder(102, 3.0);  // Create a SpecialOrder
-        specialOrder.addItem(menu[2]);  // Adding Salad to the order
-        specialOrder.displayOrderSummary();
-        System.out.println("Final Total with Discount: " + specialOrder.getFinalTotal());
-        specialOrder.addSpecialGift();  // Adding a special gift
     }
 }
